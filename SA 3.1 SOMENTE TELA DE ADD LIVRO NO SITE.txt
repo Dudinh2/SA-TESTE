@@ -1,0 +1,223 @@
+def conectar_bd():
+    try:
+        conn = mysql.connector.connect(
+            host="localhost",   # Altere se necessário
+            user="root",        # Usuário do banco
+            password="root",    # Senha do banco
+            database="bc_livraria" # Nome do banco
+        )
+        return conn
+    except mysql.connector.Error as e:
+        messagebox.showerror("Erro", f"Erro ao conectar ao banco de dados: {e}")
+        return None
+
+
+def cadastrar_livros_estoc():
+    global titulos, autor_nome, ano, genero, qtd, editora, data_entrada  # Declarar as variáveis como globais
+
+    titulos = titulo.get()
+    autor = autor_nome.get()  # Corrigido para autor_nome, já que a variável é autor_nome
+    ano = ano.get()
+    genero = genero.get()
+    qtd = qtd.get()  # Aqui deve ser a variável 'qtd'
+    editora = editora.get()
+    data_entrada = data.get()
+
+    if not (titulos and autor and ano and genero and qtd and editora and data_entrada):
+        messagebox.showerror("Erro", "Todos os campos devem ser preenchidos!")
+        return
+
+    conn = conectar_bd()
+    if conn:
+        try:
+            cursor = conn.cursor()
+            query = """
+                INSERT INTO livros (titulo, autor, ano, genero, qtd, editora, data_entrada)
+                VALUES (%s, %s, %s, %s, %s, %s, %s)
+            """
+            valores = (titulos, autor, ano, genero, qtd, editora, data_entrada)
+            cursor.execute(query, valores)
+            conn.commit()
+            messagebox.showinfo("Sucesso", "Cadastro salvo com sucesso!")
+        
+        except mysql.connector.Error as e:
+            messagebox.showerror("Erro", f"Erro ao salvar no banco de dados: {e}")
+        finally:
+            conn.close()
+    else:
+        messagebox.showerror("Erro", "Não foi possível conectar ao banco de dados.")
+
+
+def cadastrar_livros():
+    global titulo, autor_nome, ano, genero, qtd, editora, data  # Declarar as variáveis como globais
+    
+    ca = tk.Toplevel()
+    ca.title("Tela de Cadastro de Livros")
+    ca.geometry("800x600")
+    ca.configure(bg="#faf4ec")
+
+    # Título
+    tk.Label(ca, text="CADASTRO DE LIVROS", font=("Arial", 24, "bold"), bg="#b57b50", fg="white").pack(pady=20)
+
+    # Frame para organizar os campos
+    frame = tk.Frame(ca, bg="#faf4ec")
+    frame.pack(pady=10)
+
+    # Campos de cadastro
+    tk.Label(frame, text="Nome do Livro", font=("Arial", 12), bg="#faf4ec").grid(row=0, column=0, sticky="w", padx=10, pady=5)
+    titulo = tk.Entry(frame, font=("Arial", 12), width=30)
+    titulo.grid(row=0, column=1, padx=10, pady=5)
+
+    tk.Label(frame, text="Autor(a)", font=("Arial", 12), bg="#faf4ec").grid(row=1, column=0, sticky="w", padx=10, pady=5)
+    autor_nome = tk.Entry(frame, font=("Arial", 12), width=30)
+    autor_nome.grid(row=1, column=1, padx=10, pady=5)
+
+    tk.Label(frame, text="Gênero", font=("Arial", 12), bg="#faf4ec").grid(row=2, column=0, sticky="w", padx=10, pady=5)
+    genero = tk.Entry(frame, font=("Arial", 12), width=30)
+    genero.grid(row=2, column=1, padx=10, pady=5)
+
+    tk.Label(frame, text="Editora", font=("Arial", 12), bg="#faf4ec").grid(row=3, column=0, sticky="w", padx=10, pady=5)
+    editora = tk.Entry(frame, font=("Arial", 12), width=30)
+    editora.grid(row=3, column=1, padx=10, pady=5)
+
+    tk.Label(frame, text="Ano", font=("Arial", 12), bg="#faf4ec").grid(row=4, column=0, sticky="w", padx=10, pady=5)
+    ano = tk.Entry(frame, font=("Arial", 12), width=30)
+    ano.grid(row=4, column=1, padx=10, pady=5)
+
+    tk.Label(frame, text="Quantidade", font=("Arial", 12), bg="#faf4ec").grid(row=5, column=0, sticky="w", padx=10, pady=5)
+    qtd = tk.Entry(frame, font=("Arial", 12), width=30)
+    qtd.grid(row=5, column=1, padx=10, pady=5)
+
+    tk.Label(frame, text="Data de Lançamento", font=("Arial", 12), bg="#faf4ec").grid(row=6, column=0, sticky="w", padx=10, pady=5)
+    data = tk.Entry(frame, font=("Arial", 12), width=30)
+    data.grid(row=6, column=1, padx=10, pady=5)
+
+    # Botão de Cadastro
+    tk.Button(ca, text="Cadastrar Livro", font=("Arial", 12, "bold"), bg="#b57b50", fg="white", command=cadastrar_livros_estoc).pack(pady=10)
+
+    tk.Button(
+        ca, text="Voltar ⬅️", font=("Arial", 12, "bold"), bg="#b57b50", fg="white", command=tela_menu).pack(pady=10)
+
+    tk.Button(ca, text="Alterar ou Excluir", font=("Arial", 12, "bold"), bg="#b57b50", fg="white", command=tela_alterar_excluir).pack(pady=10)
+
+   
+
+#___________________ cadastro de livro site⬆️ ________________________________________________________________________________________________________________________________________________
+
+def conectar_bd():
+    try:
+        conn = mysql.connector.connect(
+            host="localhost",
+            user="root",
+            password="root",
+            database="bc_livraria"
+        )
+        return conn
+    except mysql.connector.Error as e:
+        messagebox.showerror("Erro", f"Erro ao conectar ao banco de dados: {e}")
+        return None
+
+def alterar_livro():
+    livro_id = id_livro.get()
+    novo_titulo = titulo.get()
+    novo_autor = autor_nome.get()
+    novo_ano = ano.get()
+    novo_genero = genero.get()
+    nova_qtd = qtd.get()
+    nova_editora = editora.get()
+    nova_data = data.get()
+
+    if not (livro_id and novo_titulo and novo_autor and novo_ano and novo_genero and nova_qtd and nova_editora and nova_data):
+        messagebox.showerror("Erro", "Todos os campos devem ser preenchidos!")
+        return
+
+    conn = conectar_bd()
+    if conn:
+        try:
+            cursor = conn.cursor()
+            query = """
+                UPDATE livros 
+                SET titulo = %s, autor = %s, ano = %s, genero = %s, qtd = %s, editora = %s, data_entrada = %s
+                WHERE id = %s
+            """
+            valores = (novo_titulo, novo_autor, novo_ano, novo_genero, nova_qtd, nova_editora, nova_data, livro_id)
+            cursor.execute(query, valores)
+            conn.commit()
+            messagebox.showinfo("Sucesso", "Livro alterado com sucesso!")
+        except mysql.connector.Error as e:
+            messagebox.showerror("Erro", f"Erro ao alterar o livro: {e}")
+        finally:
+            conn.close()
+
+def excluir_livro():
+    livro_id = id_livro.get()
+
+    if not livro_id:
+        messagebox.showerror("Erro", "O campo ID deve ser preenchido!")
+        return
+
+    conn = conectar_bd()
+    if conn:
+        try:
+            cursor = conn.cursor()
+            query = "DELETE FROM livros WHERE id = %s"
+            valores = (livro_id,)
+            cursor.execute(query, valores)
+            conn.commit()
+            messagebox.showinfo("Sucesso", "Livro excluído com sucesso!")
+        except mysql.connector.Error as e:
+            messagebox.showerror("Erro", f"Erro ao excluir o livro: {e}")
+        finally:
+            conn.close()
+
+def tela_alterar_excluir():
+    global id_livro, titulo, autor_nome, ano, genero, qtd, editora, data
+
+    tela = tk.Toplevel()
+    tela.title("Alterar ou Excluir Livros")
+    tela.geometry("800x600")
+    tela.configure(bg="#faf4ec")
+
+    tk.Label(tela, text="ALTERAR OU EXCLUIR LIVROS", font=("Arial", 24, "bold"), bg="#b57b50", fg="white").pack(pady=20)
+
+    frame = tk.Frame(tela, bg="#faf4ec")
+    frame.pack(pady=10)
+
+    tk.Label(frame, text="ID do Livro", font=("Arial", 12), bg="#faf4ec").grid(row=0, column=0, sticky="w", padx=10, pady=5)
+    id_livro = tk.Entry(frame, font=("Arial", 12), width=30)
+    id_livro.grid(row=0, column=1, padx=10, pady=5)
+
+    tk.Label(frame, text="Nome do Livro", font=("Arial", 12), bg="#faf4ec").grid(row=1, column=0, sticky="w", padx=10, pady=5)
+    titulo = tk.Entry(frame, font=("Arial", 12), width=30)
+    titulo.grid(row=1, column=1, padx=10, pady=5)
+
+    tk.Label(frame, text="Autor(a)", font=("Arial", 12), bg="#faf4ec").grid(row=2, column=0, sticky="w", padx=10, pady=5)
+    autor_nome = tk.Entry(frame, font=("Arial", 12), width=30)
+    autor_nome.grid(row=2, column=1, padx=10, pady=5)
+
+    tk.Label(frame, text="Gênero", font=("Arial", 12), bg="#faf4ec").grid(row=3, column=0, sticky="w", padx=10, pady=5)
+    genero = tk.Entry(frame, font=("Arial", 12), width=30)
+    genero.grid(row=3, column=1, padx=10, pady=5)
+
+    tk.Label(frame, text="Editora", font=("Arial", 12), bg="#faf4ec").grid(row=4, column=0, sticky="w", padx=10, pady=5)
+    editora = tk.Entry(frame, font=("Arial", 12), width=30)
+    editora.grid(row=4, column=1, padx=10, pady=5)
+
+    tk.Label(frame, text="Ano", font=("Arial", 12), bg="#faf4ec").grid(row=5, column=0, sticky="w", padx=10, pady=5)
+    ano = tk.Entry(frame, font=("Arial", 12), width=30)
+    ano.grid(row=5, column=1, padx=10, pady=5)
+
+    tk.Label(frame, text="Quantidade", font=("Arial", 12), bg="#faf4ec").grid(row=6, column=0, sticky="w", padx=10, pady=5)
+    qtd = tk.Entry(frame, font=("Arial", 12), width=30)
+    qtd.grid(row=6, column=1, padx=10, pady=5)
+
+    tk.Label(frame, text="Data de Lançamento", font=("Arial", 12), bg="#faf4ec").grid(row=7, column=0, sticky="w", padx=10, pady=5)
+    data = tk.Entry(frame, font=("Arial", 12), width=30)
+    data.grid(row=7, column=1, padx=10, pady=5)
+
+#ver se esses botões realmente são nescessarios
+    tk.Button(tela, text="Alterar", font=("Arial", 12, "bold"), bg="#b57b50", fg="white", command=alterar_livro).pack(pady=10)
+    tk.Button(tela, text="Excluir", font=("Arial", 12, "bold"), bg="#b57b50", fg="white", command=excluir_livro).pack(pady=10)
+
+
+    tk.Button(tela, text="Voltar ⬅️", font=("Arial", 12, "bold"), bg="#b57b50", fg="white", command=tela.destroy).pack(pady=10)
