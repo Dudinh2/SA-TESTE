@@ -1,0 +1,151 @@
+def conectar_bd():
+    try:
+        conn = mysql.connector.connect(
+            host="localhost",
+            user="root",
+            password="root",
+            database="bc_livraria"
+        )
+        return conn
+    except mysql.connector.Error as e:
+        messagebox.showerror("Erro", f"Erro ao conectar ao banco de dados: {e}")
+        return None
+
+def salvar_cadastro():
+    nome = nomes.get()
+    telefone = telefone.get()
+    email = email.get()
+    cargo = cargo.get()
+    cep = CEP.get()
+    login = LOGIN.get()
+    senha = senha.get()
+    data_entr = data.get()
+
+    if not (nome and telefone and email and cargo and cep and login and senha and data_entr):
+        messagebox.showerror("Erro", "Todos os campos devem ser preenchidos!")
+        return
+
+    conn = conectar_bd()
+    if conn:
+        try:
+            cursor = conn.cursor()
+            query = """
+                INSERT INTO cadastro_funci (nome, tel, email, cargo, cep, login, senha, data_entr)
+                VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
+            """
+            valores = (nome, telefone, email, cargo, cep, login, senha, data_entr)
+            cursor.execute(query, valores)
+            conn.commit()
+            messagebox.showinfo("Sucesso", "Cadastro salvo com sucesso!")
+        except mysql.connector.Error as e:
+            messagebox.showerror("Erro", f"Erro ao salvar no banco de dados: {e}")
+        finally:
+            conn.close()
+
+def alterar_cadastro():
+    codigo = CODIGO.get()
+    nome = nomes.get()
+    telefone = telefone.get()
+    email = email.get()
+    cargo = cargo.get()
+    cep = CEP.get()
+    login = LOGIN.get()
+    senha = senha.get()
+    data_entr = data.get()
+
+    if not codigo:
+        messagebox.showerror("Erro", "O código do funcionário deve ser informado!")
+        return
+
+    conn = conectar_bd()
+    if conn:
+        try:
+            cursor = conn.cursor()
+            query = """
+                UPDATE cadastro_funci 
+                SET nome = %s, tel = %s, email = %s, cargo = %s, cep = %s, login = %s, senha = %s, data_entr = %s
+                WHERE id = %s
+            """
+            valores = (nome, telefone, email, cargo, cep, login, senha, data_entr, codigo)
+            cursor.execute(query, valores)
+            conn.commit()
+            messagebox.showinfo("Sucesso", "Cadastro alterado com sucesso!")
+        except mysql.connector.Error as e:
+            messagebox.showerror("Erro", f"Erro ao alterar o cadastro: {e}")
+        finally:
+            conn.close()
+
+def excluir_cadastro():
+    codigo = CODIGO.get()
+
+    if not codigo:
+        messagebox.showerror("Erro", "O código do funcionário deve ser informado!")
+        return
+
+    conn = conectar_bd()
+    if conn:
+        try:
+            cursor = conn.cursor()
+            query = "DELETE FROM cadastro_funci WHERE id = %s"
+            cursor.execute(query, (codigo,))
+            conn.commit()
+            messagebox.showinfo("Sucesso", "Cadastro excluído com sucesso!")
+        except mysql.connector.Error as e:
+            messagebox.showerror("Erro", f"Erro ao excluir o cadastro: {e}")
+        finally:
+            conn.close()
+
+def tela_funcionario():
+    global nomes, telefone, email, cargo, CEP, CODIGO, LOGIN, senha, data
+
+    c = tk.Toplevel()
+    c.title("Tela de Cadastro de Funcionário")
+    c.geometry("800x700")
+    c.configure(bg="#faf4ec")
+
+    tk.Label(c, text="CADASTRO DE FUNCIONÁRIO", font=("Arial", 24, "bold"), bg="#b57b50", fg="white").pack(pady=20)
+
+    frame = tk.Frame(c, bg="#faf4ec")
+    frame.pack(pady=10)
+
+    tk.Label(frame, text="Código", font=("Arial", 12), bg="#faf4ec").grid(row=0, column=0, sticky="w", padx=10, pady=5)
+    CODIGO = tk.Entry(frame, font=("Arial", 12), width=30)
+    CODIGO.grid(row=0, column=1, padx=10, pady=5)
+
+    tk.Label(frame, text="Nome", font=("Arial", 12), bg="#faf4ec").grid(row=1, column=0, sticky="w", padx=10, pady=5)
+    nomes = tk.Entry(frame, font=("Arial", 12), width=30)
+    nomes.grid(row=1, column=1, padx=10, pady=5)
+
+    tk.Label(frame, text="Número de telefone", font=("Arial", 12), bg="#faf4ec").grid(row=2, column=0, sticky="w", padx=10, pady=5)
+    telefone = tk.Entry(frame, font=("Arial", 12), width=30)
+    telefone.grid(row=2, column=1, padx=10, pady=5)
+
+    tk.Label(frame, text="Cargo", font=("Arial", 12), bg="#faf4ec").grid(row=3, column=0, sticky="w", padx=10, pady=5)
+    cargo = tk.Entry(frame, font=("Arial", 12), width=30)
+    cargo.grid(row=3, column=1, padx=10, pady=5)
+
+    tk.Label(frame, text="CEP", font=("Arial", 12), bg="#faf4ec").grid(row=4, column=0, sticky="w", padx=10, pady=5)
+    CEP = tk.Entry(frame, font=("Arial", 12), width=30)
+    CEP.grid(row=4, column=1, padx=10, pady=5)
+
+    tk.Label(frame, text="E-mail", font=("Arial", 12), bg="#faf4ec").grid(row=1, column=2, sticky="e", padx=10, pady=5)
+    email = tk.Entry(frame, font=("Arial", 12), width=30)
+    email.grid(row=1, column=3, padx=10, pady=5)
+
+    tk.Label(frame, text="LOGIN", font=("Arial", 12), bg="#faf4ec").grid(row=2, column=2, sticky="e", padx=10, pady=5)
+    LOGIN = tk.Entry(frame, font=("Arial", 12), width=30)
+    LOGIN.grid(row=2, column=3, padx=10, pady=5)
+
+    tk.Label(frame, text="SENHA", font=("Arial", 12), bg="#faf4ec").grid(row=3, column=2, sticky="e", padx=10, pady=5)
+    senha = tk.Entry(frame, font=("Arial", 12), show="*", width=30)
+    senha.grid(row=3, column=3, padx=10, pady=5)
+
+    tk.Label(frame, text="DATA DE ENTRADA", font=("Arial", 12), bg="#faf4ec").grid(row=4, column=2, sticky="e", padx=10, pady=5)
+    data = tk.Entry(frame, font=("Arial", 12), width=30)
+    data.grid(row=4, column=3, padx=10, pady=5)
+
+    tk.Button(c, text="Salvar", font=("Arial", 12, "bold"), bg="#b57b50", fg="white", command=salvar_cadastro).pack(pady=10)
+    tk.Button(c, text="Alterar", font=("Arial", 12, "bold"), bg="#b57b50", fg="white", command=alterar_cadastro).pack(pady=10)
+    tk.Button(c, text="Excluir", font=("Arial", 12, "bold"), bg="#b57b50", fg="white", command=excluir_cadastro).pack(pady=10)
+    tk.Button(c, text="Voltar ⬅️", font=("Arial", 12, "bold"), bg="#b57b50", fg="white", command=c.destroy).pack(pady=10)
+
